@@ -1,0 +1,3 @@
+image_path, contamination_level
+train_data_directory/relu/test_20171017_190121D.jpg , relu
+validation_data_directory/softmax/test_20171016_104321D.jpg, softmax
