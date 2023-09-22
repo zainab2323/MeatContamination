@@ -1,3 +1,4 @@
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -36,6 +37,7 @@ def get_data(data_dir):
     return np.array(data)
 
 
+# Now we can easily fetch our train and validation data.
 train = get_data('Dataset')
 val = get_data('Dataset')
 l = []
@@ -46,6 +48,8 @@ for i in train:
         l.append("ContaminatedMeat")
 sns.set_style('darkgrid')
 # sns.countplot(l)
+# Let us also visualize a random image from Uncontaminated meat:-
+
 plt.figure(figsize=(5, 5))
 plt.imshow(train[1][0])
 plt.title(labels[train[0][1]])
@@ -120,7 +124,7 @@ val_acc = history.history['val_accuracy']
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 
-epochs_range = range(2)  # range(500)
+epochs_range = range(100)  # range(500)
 
 plt.figure(figsize=(15, 15))
 plt.subplot(2, 2, 1)
@@ -135,53 +139,53 @@ plt.plot(epochs_range, val_loss, label='Validation Loss')
 plt.legend(loc='upper right')
 plt.title('Training and Validation Loss - 1')
 plt.show()
-# predictions = model.predict_classes(x_val)
-# predictions = predictions.reshape(1, -1)[0]
-# print(classification_report(y_val, predictions,
-#       target_names=['UnContaminatedMeat (Class 0)', 'ContaminatedMeat (Class 1)']))
+predictions = model.predict_classes(x_val)
+predictions = predictions.reshape(1, -1)[0]
+print(classification_report(y_val, predictions,
+      target_names=['UnContaminatedMeat (Class 0)', 'ContaminatedMeat (Class 1)']))
 model.save('meat_contamination_cnn_model.h5')
 
-# base_model = tf.keras.applications.MobileNetV2(
-#     input_shape=(224, 224, 3), include_top=False, weights="imagenet")
-# base_model.trainable = False
-# base_learning_rate = 0.00001
-# model = tf.keras.Sequential([base_model,
-#                              tf.keras.layers.GlobalAveragePooling2D(),
-#                              tf.keras.layers.Dropout(0.2),
-#                              tf.keras.layers.Dense(2, activation="softmax")
-#                              ])
+base_model = tf.keras.applications.MobileNetV2(
+    input_shape=(224, 224, 3), include_top=False, weights="imagenet")
+base_model.trainable = False
+base_learning_rate = 0.00001
+model = tf.keras.Sequential([base_model,
+                             tf.keras.layers.GlobalAveragePooling2D(),
+                             tf.keras.layers.Dropout(0.2),
+                             tf.keras.layers.Dense(2, activation="softmax")
+                             ])
+# Next, let’s compile the model and start training it.
+model.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
+              loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+              metrics=['accuracy'])
 
-# model.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
-#               loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
-#               metrics=['accuracy'])
+history = model.fit(x_train, y_train, epochs=100,
+                    validation_data=(x_val, y_val))
 
-# history = model.fit(x_train, y_train, epochs=2,
-#                     validation_data=(x_val, y_val))
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+epochs_range = range(100)
 
-# acc = history.history['accuracy']
-# val_acc = history.history['val_accuracy']
-# loss = history.history['loss']
-# val_loss = history.history['val_loss']
-# epochs_range = range(2)
+plt.figure(figsize=(15, 15))
+plt.subplot(2, 2, 1)
+plt.plot(epochs_range, acc, label='Training Accuracy')
+plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+plt.legend(loc='lower right')
+plt.title('Training and Validation Accuracy - 2')
 
-# plt.figure(figsize=(15, 15))
-# plt.subplot(2, 2, 1)
-# plt.plot(epochs_range, acc, label='Training Accuracy')
-# plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-# plt.legend(loc='lower right')
-# plt.title('Training and Validation Accuracy - 2')
+plt.subplot(2, 2, 2)
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss - 2')
+plt.show()
+predictions = model.predict_classes(x_val)
+predictions = predictions.reshape(1, -1)[0]
 
-# plt.subplot(2, 2, 2)
-# plt.plot(epochs_range, loss, label='Training Loss')
-# plt.plot(epochs_range, val_loss, label='Validation Loss')
-# plt.legend(loc='upper right')
-# plt.title('Training and Validation Loss - 2')
-# plt.show()
-# predictions = model.predict_classes(x_val)
-# predictions = predictions.reshape(1, -1)[0]
-
-# print(classification_report(y_val, predictions,
-#       target_names=['Rugby (Class 0)', 'Soccer (Class 1)']))
-# model.summary()
-# base_model.summary()
-# base_model.save('meat_contamination_cnn_baseModel.h5')
+print(classification_report(y_val, predictions,
+      target_names=['UnContaminatedMeat (Class 0-2)', 'ContaminatedMeat (Class 1-2)']))
+model.summary()
+base_model.summary()
+base_model.save('meat_contamination_cnn_baseModel.h5')
